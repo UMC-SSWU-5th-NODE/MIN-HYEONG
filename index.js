@@ -29,6 +29,10 @@ app.use("/temp", tempRouter);
 
 // error handler
 app.use((err, req, res, next) => {
-  console.error("?", err.stack);
-  res.status(500).send("Something broke! : ", err.message);
+  // console.error("?", err.stack);
+  // res.status(500).send("Something broke! : ", err.message);
+
+  res.locals.message = err.message;
+  res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
+  res.status(err.data.status).send(response(err.data));
 });

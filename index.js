@@ -1,6 +1,7 @@
 import express from "express";
 import mysql from "mysql";
 import dotenv from "dotenv";
+import { tempRouter } from "./src/routes/temp.route.js";
 
 dotenv.config();
 
@@ -21,4 +22,13 @@ app.get("/", function (req, res) {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+});
+
+// router setting
+app.use("/temp", tempRouter);
+
+// error handler
+app.use((err, req, res, next) => {
+  console.error("?", err.stack);
+  res.status(500).send("Something broke! : ", err.message);
 });

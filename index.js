@@ -19,21 +19,73 @@ const connection = mysql.createConnection({
   database: process.env.DATABASE,
 });
 
-// server setting - veiw, static, body-parser etc..
-app.set("port", process.env.PORT || 3000); // 서버 포트 지정
-app.use(express.static("public")); // 정적 파일 접근
-app.use(express.json()); // request의 본문을 json으로 해석할 수 있도록 함
+// in_progress 데이터 추출 쿼리
+const inProgressQuery = `
+  SELECT
+    store.name AS store_name,
+    mission.deadline AS due_date,
+    store.store_type,
+    mission.mission_spec AS mission_description
+  FROM
+    mission
+  JOIN
+    store ON mission.store_id = store.id
+  WHERE
+    mission.status = 'in_progress';
+`;
+
+// success 데이터 추출 쿼리
+const successQuery = `
+  SELECT
+    store.name AS store_name,
+    mission.deadline AS due_date,
+    store.store_type,
+    mission.mission_spec AS mission_description
+  FROM
+    mission
+  JOIN
+    store ON mission.store_id = store.id
+  WHERE
+    mission.status = 'success';
+`;
+
+// executeQuery 함수 정의
+function executeQuery(query, res) {
+  connection.query(query, (err, rows, fields) => {
+    if (err) {
+      console.error("Error executing query:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+    res.send(rows);
+  });
+}
+
+// server setting - view, static, body-parser etc..
+app.set("port", process.env.PORT || 3000);
+app.use(express.static("public"));
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // router setting
 app.use("/temp", tempRouter);
 
+// missions 라우터
 app.get("/missions", (req, res) => {
-  connection.query("SELECT * FROM mission", (err, rows, fields) => {
-    if (err) throw err;
-    res.send(rows);
-  });
-  console.log("missions");
+  const status = req.query.status;
+
+  if (!status) {
+    res.status(400).send("Bad Request: 'status' parameter is missing");
+    return;
+  }
+
+  if (status === "in_progress") {
+    executeQuery(inProgressQuery, res);
+  } else if (status === "success") {
+    executeQuery(successQuery, res);
+  } else {
+    res.status(400).send("Bad Request: Invalid status value");
+  }
 });
 
 // error handling
@@ -45,19 +97,11 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.log(err.data.status);
   console.log(err.data.message);
-  // 템플릿 엔진 변수 설정
   res.locals.message = err.message;
-  // 개발환경이면 에러를 출력하고 아니면 출력하지 않기
   res.locals.error = process.env.NODE_ENV !== "production" ? err : {};
   res.status(err.data.status).send(response(err.data));
 });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
-  console.log(
-    process.env.HOST,
-    process.env.USERNAME,
-    process.env.PASSWORD,
-    process.env.DATABASE
-  );
 });

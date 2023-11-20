@@ -1,11 +1,23 @@
 import express from "express";
+import mysql from "mysql2";
+import dotenv from "dotenv";
 import { response } from "./config/response.js";
 import { tempRouter } from "./src/routes/temp.route.js";
 import { BaseError } from "./config/error.js";
 import { status } from "./config/response.status.js";
 
+dotenv.config();
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+const connection = mysql.createConnection({
+  host: process.env.HOST,
+  port: port,
+  user: process.env.USERNAME,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
+});
 
 // server setting - veiw, static, body-parser etc..
 app.set("port", process.env.PORT || 3000); // 서버 포트 지정
@@ -15,6 +27,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // router setting
 app.use("/temp", tempRouter);
+
+app.get("/missions", (req, res) => {
+  connection.query("SELECT * FROM mission", (err, rows, fields) => {
+    if (err) throw err;
+    res.send(rows);
+  });
+  console.log("missions");
+});
 
 // error handling
 app.use((req, res, next) => {
@@ -34,4 +54,10 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+  console.log(
+    process.env.HOST,
+    process.env.USERNAME,
+    process.env.PASSWORD,
+    process.env.DATABASE
+  );
 });

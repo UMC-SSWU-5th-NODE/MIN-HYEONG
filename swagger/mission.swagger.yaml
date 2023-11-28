@@ -1,0 +1,53 @@
+paths:
+  /mission/challenge:
+    post:
+      summary: "Challenge a Mission"
+      description: "Challenge a new mission."
+      parameters:
+        - in: body
+          name: mission
+          description: "Mission object to be challenged"
+          required: true
+          schema:
+            type: object
+            properties:
+              store_id:
+                type: integer
+                description: "Store ID associated with the mission."
+              reward:
+                type: integer
+                description: "Mission reward."
+      responses:
+        201:
+          description: "Successful response indicating the mission was challenged."
+          schema:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+                description: "Mission ID."
+              store_id:
+                type: "integer"
+                description: "Store ID associated with the mission."
+              reward:
+                type: "integer"
+                description: "Mission reward."
+              deadline:
+                type: "string"
+                format: "date-time"
+                description: "Mission deadline."
+              mission_spec:
+                type: "string"
+                description: "Mission specification."
+              created_at:
+                type: "string"
+                format: "date-time"
+                description: "Timestamp indicating the mission creation time."
+              updated_at:
+                type: "string"
+                format: "date-time"
+                description: "Timestamp indicating the last update time of the mission."
+        400:
+          description: "Bad Request if the request body is missing or invalid."
+        500:
+          description: "Internal Server Error if there is an issue with the server."

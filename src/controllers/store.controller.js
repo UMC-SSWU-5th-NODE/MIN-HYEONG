@@ -1,4 +1,4 @@
-import { StoreDTO } from "../dto/store.dto.js";
+import { StoreDTO } from "../dtos/store.dto.js";
 import { createStore } from "../services/store.service.js";
 
 const addStore = async (req, res) => {

@@ -5,6 +5,7 @@ import { response } from "./config/response.js";
 import { tempRouter } from "./src/routes/temp.route.js";
 import { reviewRouter } from "./src/routes/review.route.js";
 import { storeRouter } from "./src/routes/store.route.js";
+import { missionRouter } from "./src/routes/mission.route.js";
 import { BaseError } from "./config/error.js";
 import { status } from "./config/response.status.js";
 import { swaggerSpec } from "./config/swagger.config.js";
@@ -74,6 +75,7 @@ app.get("/missions", async (req, res) => {
 
 // mission 라우터
 app.use("/review", reviewRouter);
+app.use("/mission", missionRouter);
 app.use("/store", storeRouter);
 app.use((err, req, res, next) => {
   if (err) {

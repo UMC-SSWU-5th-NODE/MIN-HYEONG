@@ -1,0 +1,58 @@
+paths:
+  /store/add:
+    post:
+      summary: "Add a Store"
+      description: "Add a new store to a specific region."
+      parameters:
+        - in: body
+          name: store
+          description: "Store object to be created"
+          required: true
+          schema:
+            type: object
+            properties:
+              region_id:
+                type: integer
+                description: "Region ID where the store is located."
+              name:
+                type: string
+                description: "Store name."
+              address:
+                type: string
+                description: "Store address."
+              score:
+                type: number
+                description: "Store score or rating."
+      responses:
+        201:
+          description: "Successful response indicating the store was added."
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: "Store ID."
+              region_id:
+                type: integer
+                description: "Region ID where the store is located."
+              name:
+                type: string
+                description: "Store name."
+              address:
+                type: string
+                description: "Store address."
+              score:
+                type: number
+                description: "Store score or rating."
+              created_at:
+                type: string
+                format: "date-time"
+                description: "Timestamp indicating the store creation time."
+              updated_at:
+                type: string
+                format: "date-time"
+                description: "Timestamp indicating the last update time of the store."
+        400:
+          description: "Bad Request if the request body is missing or invalid."
+        500:
+          description: "Internal Server Error if there is an issue with the server."

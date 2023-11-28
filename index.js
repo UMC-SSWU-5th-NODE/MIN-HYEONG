@@ -1,8 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
-import { connection } from "./config/db.config.js";
+import { sequelize } from "./config/db.config.js";
 import { response } from "./config/response.js";
 import { tempRouter } from "./src/routes/temp.route.js";
+import { reviewRouter } from "./src/routes/review.route.js";
 import { BaseError } from "./config/error.js";
 import { status } from "./config/response.status.js";
 import { swaggerSpec } from "./config/swagger.config.js";
@@ -26,15 +27,16 @@ const successQuery = `
 `;
 
 // executeQuery 함수 정의
-function executeQuery(query, res) {
-  connection.query(query, (err, rows, fields) => {
-    if (err) {
-      console.error("Error executing query:", err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
+async function executeQuery(query, res) {
+  try {
+    const rows = await sequelize.query(query, {
+      type: sequelize.QueryTypes.SELECT,
+    });
     res.send(rows);
-  });
+  } catch (err) {
+    console.error("Error executing query:", err);
+    res.status(500).send("Internal Server Error");
+  }
 }
 
 // server setting - view, static, body-parser etc..
@@ -47,7 +49,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/temp", tempRouter);
 
 // missions 라우터
-app.get("/missions", (req, res) => {
+app.get("/missions", async (req, res) => {
   const status = req.query.status;
 
   if (!status) {
@@ -55,12 +57,26 @@ app.get("/missions", (req, res) => {
     return;
   }
 
+  let query;
   if (status === "in_progress") {
-    executeQuery(inProgressQuery, res);
+    query = inProgressQuery;
   } else if (status === "success") {
-    executeQuery(successQuery, res);
+    query = successQuery;
   } else {
     res.status(400).send("Bad Request: Invalid status value");
+    return;
+  }
+
+  // executeQuery 함수 호출
+  await executeQuery(query, res);
+});
+
+// mission 라우터
+app.use("/review", reviewRouter);
+app.use((err, req, res, next) => {
+  if (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
   }
 });
 

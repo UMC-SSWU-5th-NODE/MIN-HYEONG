@@ -5,11 +5,15 @@ import { response } from "./config/response.js";
 import { tempRouter } from "./src/routes/temp.route.js";
 import { BaseError } from "./config/error.js";
 import { status } from "./config/response.status.js";
+import { swaggerSpec } from "./config/swagger.config.js";
+import SwaggerUi from "swagger-ui-express";
 
 dotenv.config();
-
-const app = express();
 const port = process.env.PORT || 3000;
+const app = express();
+
+app.use(express.urlencoded({ extended: false }));
+app.use("/api-docs", SwaggerUi.serve, SwaggerUi.setup(swaggerSpec));
 
 // in_progress 데이터 추출 쿼리
 const inProgressQuery = `

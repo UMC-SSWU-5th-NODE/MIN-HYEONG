@@ -1,6 +1,6 @@
 import express from "express";
-import mysql from "mysql2";
 import dotenv from "dotenv";
+import { connection } from "./config/db.config.js";
 import { response } from "./config/response.js";
 import { tempRouter } from "./src/routes/temp.route.js";
 import { BaseError } from "./config/error.js";
@@ -11,42 +11,14 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-const connection = mysql.createConnection({
-  host: process.env.HOST,
-  port: port,
-  user: process.env.USERNAME,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
-});
-
 // in_progress 데이터 추출 쿼리
 const inProgressQuery = `
-  SELECT
-    store.name AS store_name,
-    mission.deadline AS due_date,
-    store.store_type,
-    mission.mission_spec AS mission_description
-  FROM
-    mission
-  JOIN
-    store ON mission.store_id = store.id
-  WHERE
-    mission.status = 'in_progress';
+  SELECT * FROM mission
 `;
 
 // success 데이터 추출 쿼리
 const successQuery = `
-  SELECT
-    store.name AS store_name,
-    mission.deadline AS due_date,
-    store.store_type,
-    mission.mission_spec AS mission_description
-  FROM
-    mission
-  JOIN
-    store ON mission.store_id = store.id
-  WHERE
-    mission.status = 'success';
+  SELECT * FROM mission
 `;
 
 // executeQuery 함수 정의
